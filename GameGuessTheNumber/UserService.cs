@@ -15,20 +15,35 @@ internal class UserService
     {
         var list = new List<User>();
 
-        if (!File.Exists(_csvFile))
-            return list;
-
-        foreach (var line in File.ReadAllLines(_csvFile))
+        try
         {
-            var parts = line.Split(',');
+            if (!File.Exists(_csvFile))
+                return list;
 
-            list.Add(new User
+            foreach (var line in File.ReadAllLines(_csvFile))
             {
-                Name = parts[0],
-                UserName = parts[1],
-                Password = parts[2],
-                HigestScore = int.TryParse(parts[3], out int s) ? s : (int?)null
-            });
+                if (string.IsNullOrWhiteSpace(line)) continue;
+
+                var parts = line.Split(',');
+                if (parts.Length >= 4)
+                {
+                    list.Add(new User
+                    {
+                        Name = parts[0],
+                        UserName = parts[1],
+                        Password = parts[2],
+                        HigestScore = int.TryParse(parts[3], out int s) ? s : (int?)null
+                    });
+                }
+            }
+        }
+        catch (IOException ex)
+        {
+            Console.WriteLine($"Error loading user data from file: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An unexpected error occurred while loading users: {ex.Message}");
         }
 
         return list;
@@ -36,73 +51,99 @@ internal class UserService
 
     public void SaveUsers()
     {
-        var lines = _users
-            .Select(u => $"{u.Name},{u.UserName},{u.Password},{u.HigestScore}")
-            .ToArray();
+        try
+        {
+            var lines = _users
+                .Select(u => $"{u.Name},{u.UserName},{u.Password},{u.HigestScore}")
+                .ToArray();
 
-        File.WriteAllLines(_csvFile, lines);
+            File.WriteAllLines(_csvFile, lines);
+        }
+        catch (IOException ex)
+        {
+            Console.WriteLine($"Error saving user data to file: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An unexpected error occurred while saving users: {ex.Message}");
+        }
     }
 
     public void Register()
     {
-        Console.Clear();
-        Console.Write("Enter your name: ");
-        string? name = Console.ReadLine() ?? string.Empty;
-        Console.Write("Enter username: ");
-        string? username = Console.ReadLine() ?? string.Empty;
-        Console.Write("Enter password: ");
-        string? password = Console.ReadLine() ?? string.Empty;
-        if (string.IsNullOrWhiteSpace(name) ||
-            string.IsNullOrWhiteSpace(username) ||
-            string.IsNullOrWhiteSpace(password))
+        try
         {
-            Console.WriteLine("All fields are required!");
-            return;
+            Console.Clear();
+            Console.Write("Enter your name: ");
+            string? name = Console.ReadLine() ?? string.Empty;
+            Console.Write("Enter username: ");
+            string? username = Console.ReadLine() ?? string.Empty;
+            Console.Write("Enter password: ");
+            string? password = Console.ReadLine() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(name) ||
+                string.IsNullOrWhiteSpace(username) ||
+                string.IsNullOrWhiteSpace(password))
+            {
+                Console.WriteLine("All fields are required!");
+                return;
+            }
+
+            if (_users.Any(u => u.UserName == username))
+            {
+                Console.WriteLine("Username already exists!");
+                return;
+            }
+
+            _users.Add(new User
+            {
+                Name = name,
+                UserName = username,
+                Password = password,
+                HigestScore = null
+            });
+
+            SaveUsers();
+
+            Console.WriteLine("Registration successful!");
         }
-
-        if (_users.Any(u => u.UserName == username))
+        catch (Exception ex)
         {
-            Console.WriteLine("Username already exists!");
-            return;
+            Console.WriteLine($"An error occurred during registration: {ex.Message}");
         }
-
-        _users.Add(new User
-        {
-            Name = name,
-            UserName = username,
-            Password = password,
-            HigestScore = null
-        });
-
-        SaveUsers();
-
-        Console.WriteLine("Registration successful!");
     }
 
-    public User Login()
+    public User? Login()
     {
-        Console.Clear();
-        Console.Write("Username: ");
-        string username = Console.ReadLine() ?? string.Empty;
-
-        var user = _users.FirstOrDefault(u => u.UserName == username);
-
-        if (user == null)
+        try
         {
-            Console.WriteLine("User not found.");
+            Console.Clear();
+            Console.Write("Username: ");
+            string username = Console.ReadLine() ?? string.Empty;
+
+            var user = _users.FirstOrDefault(u => u.UserName == username);
+
+            if (user == null)
+            {
+                Console.WriteLine("User not found.");
+                return null;
+            }
+
+            Console.Write("Password: ");
+            string pass = Console.ReadLine() ?? string.Empty;
+
+            if (user.Password != pass)
+            {
+                Console.WriteLine("Wrong password.");
+                return null;
+            }
+
+            return user;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An error occurred during login: {ex.Message}");
             return null;
         }
-
-        Console.Write("Password: ");
-        string pass = Console.ReadLine() ?? string.Empty;
-
-        if (user.Password != pass)
-        {
-            Console.WriteLine("Wrong password.");
-            return null;
-        }
-
-        return user;
     }
 
     public void UpdateBestScore(User user, int newScore)

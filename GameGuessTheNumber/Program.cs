@@ -4,57 +4,68 @@ internal class Program
 {
     static void Main(string[] args)
     {
-
-        const string csvFile = "C:\\Users\\magda\\Desktop\\FinalExamGITA\\GameGuessTheNumber\\Records.csv";
-        var userService = new UserService(csvFile);
-        var gameService = new GameService();
-
-
-        while (true)
+        try
         {
-            Console.Clear();
-            Console.WriteLine("===== GUESS THE NUMBER =====");
-            Console.WriteLine("1. Register");
-            Console.WriteLine("2. Login");
-            Console.WriteLine("3. Leaderboard");
-            Console.WriteLine("4. Exit");
-            Console.Write("Choose: ");
+            const string csvFile = "C:\\Users\\magda\\Desktop\\FinalExamGITA\\GameGuessTheNumber\\Records.csv";
+            var userService = new UserService(csvFile);
+            var gameService = new GameService();
 
-            string choice = Console.ReadLine();
 
-            if (choice == "1")
+            while (true)
             {
-                userService.Register();
-            }
-            else if (choice == "2")
-            {
-                var user = userService.Login();
-                if (user != null)
+                Console.Clear();
+                Console.WriteLine("===== GUESS THE NUMBER =====");
+                Console.WriteLine("1. Register");
+                Console.WriteLine("2. Login");
+                Console.WriteLine("3. Leaderboard");
+                Console.WriteLine("4. Exit");
+                Console.Write("Choose: ");
+
+                string? choice = Console.ReadLine();
+
+                switch (choice)
                 {
-                    Console.Clear();
-                    Console.WriteLine($"Welcome, {user.UserName}!");
-                    int attempts = gameService.Play();
+                    case "1":
+                        userService.Register();
+                        break;
+                    case "2":
+                        var user = userService.Login();
+                        if (user != null)
+                        {
+                            Console.Clear();
+                            Console.WriteLine($"Welcome, {user.UserName}!");
 
-                    userService.UpdateBestScore(user, attempts);
-                    userService.SaveUsers();
+                            Console.WriteLine("\nPress ENTER to start the game...");
+                            Console.ReadLine();
+
+                            int attempts = gameService.Play();
+
+                            if (attempts >= 0)
+                            {
+                                userService.UpdateBestScore(user, attempts);
+                                userService.SaveUsers();
+                            }
+                        }
+                        break;
+                    case "3":
+                        userService.ShowLeaderboard();
+                        break;
+                    case "4":
+                        return;
+                    default:
+                        Console.WriteLine("Invalid choice.");
+                        break;
                 }
+
+                Console.WriteLine("\nPress ENTER to continue...");
+                Console.ReadLine();
             }
-            else if (choice == "3")
-            {
-                userService.ShowLeaderboard();
-            }
-            else if (choice == "4")
-            {
-                return;
-            }
-            else
-            {
-                Console.WriteLine("Invalid choice.");
-            }
-            Console.WriteLine();
-            Console.WriteLine("Press ENTER to continue...");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"A critical error occurred in the main application loop: {ex.Message}");
+            Console.WriteLine("Press ENTER to exit.");
             Console.ReadLine();
         }
-
     }
 }

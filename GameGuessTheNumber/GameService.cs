@@ -1,37 +1,35 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace GameGuessTheNumber;
+﻿namespace GameGuessTheNumber;
 
 internal class GameService
 {
-    private static bool isWinner = false;
     public int Play()
     {
-        int tries = 1;
-        var randomNumber = GetRandomNumberInRange();
-        if (randomNumber == 0)
+        try
         {
-            return 0;
-        }
-        Console.Clear();
-        do
-        {
-            
+            var randomNumber = GetRandomNumberInRange();
+            Console.Clear();
+            if (randomNumber == 0)
+            {
+                Console.WriteLine("Could not start the game due to an invalid level selection.");
+                return -1;
+            }
+
+            int tries = 0;
+            bool isWinner = false;
+
             for (int attempts = 10; attempts > 0; attempts--)
             {
                 Console.WriteLine($"You have {attempts} attempts left. Enter your guess:");
                 var raw = Console.ReadLine() ?? string.Empty;
+
                 if (int.TryParse(raw, out var guess))
                 {
-
+                    tries++;
                     if (guess == randomNumber)
                     {
-                        Console.WriteLine($"Congratulations! You've guessed the number in {tries} attempts!");
+                        Console.WriteLine($"Congratulations! You've guessed the number in {tries} attempt!");
                         isWinner = true;
-                    }
-                    else if(attempts - 1 == 0)
-                    {
-                        Console.WriteLine($"Game over! You have lost the game. Correct number was {randomNumber}.");
+                        break;
                     }
                     else
                     {
@@ -42,44 +40,56 @@ internal class GameService
                 {
                     Console.WriteLine("Invalid input. Please enter a number.");
                 }
-                if (isWinner)
-                {
-                    break;
-                }
-                
-                    tries++;
             }
+
+            if (!isWinner)
+            {
+                Console.WriteLine($"Sorry, you've run out of attempts! The number was {randomNumber}.");
+            }
+
             return tries;
         }
-        while (!isWinner);
-    }
-
-
-
-    private static int GetRandomNumberInRange()
-    {
-        var level = SelectGamingLevel();
-        switch (level)
+        catch (Exception ex)
         {
-            case 1:
-                return GetRandomNumber(1, 15);
-            case 2:
-                return GetRandomNumber(1, 25);
-            case 3:
-                return GetRandomNumber(1, 50);
-            default:
-                Console.WriteLine("Invalid level selection.");
-                return 0;
+            Console.WriteLine($"An unexpected error occurred during the game: {ex.Message}");
+            return -1;
         }
     }
-    private static int GetRandomNumber(int min, int max)
+
+    private int GetRandomNumberInRange()
+    {
+        try
+        {
+            var level = SelectGamingLevel();
+            switch (level)
+            {
+                case 1:
+                    return GetRandomNumber(1, 15);
+                case 2:
+                    return GetRandomNumber(1, 25);
+                case 3:
+                    return GetRandomNumber(1, 50);
+                default:
+                    Console.WriteLine("Invalid level selection.");
+                    return 0;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An error occurred while selecting the level: {ex.Message}");
+            return 0;
+        }
+    }
+
+    private int GetRandomNumber(int min, int max)
     {
         var random = new Random();
         return random.Next(min, max + 1);
     }
 
-    private static int SelectGamingLevel()
+    private int SelectGamingLevel()
     {
+        Console.Clear();
         while (true)
         {
             Console.WriteLine("Select game level to play:");
