@@ -57,7 +57,11 @@ internal class UserService
                 Console.WriteLine("All fields are required!");
                 return;
             }
-
+            if (_userRepository.GetUserByUsername(username) != null)
+            {
+                Console.WriteLine("Username already exists!");
+                return;
+            }
             User user = new User
             {
                 Name = name,
@@ -125,25 +129,33 @@ internal class UserService
 
     public void ShowLeaderboard()
     {
-        Console.Clear();
-        Console.WriteLine("===== LEADERBOARD =====\n");
-
-        var topTen = GetTopTenUsers();
-
-        if (topTen.Count == 0)
+        try
         {
-            Console.WriteLine("No scores yet!");
-            return;
+            Console.Clear();
+            Console.WriteLine("===== LEADERBOARD =====\n");
+
+            var topTen = GetTopTenUsers();
+
+            if (topTen.Count == 0)
+            {
+                Console.WriteLine("No scores yet!");
+                return;
+            }
+
+            int rank = 1;
+            Console.WriteLine($"{"Rank",-7}{"User",-10}{"Username",-13}{"Best Score"}");
+            Console.WriteLine(new string('-', 35));
+
+            foreach (var u in topTen)
+            {
+                Console.WriteLine($"{rank,-7}{u.Name,-10}{u.UserName,-13}{u.HigestScore}");
+                rank++;
+            }
         }
-
-        int rank = 1;
-        Console.WriteLine($"{"Rank",-7}{"User",-13}{"Best Score"}");
-        Console.WriteLine(new string('-', 35));
-
-        foreach (var u in topTen)
+        catch (Exception ex)
         {
-            Console.WriteLine($"{rank,-7}{u.Name,-13}{u.HigestScore}");
-            rank++;
+
+            Console.WriteLine(ex.Message);
         }
 
     }

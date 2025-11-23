@@ -1,6 +1,4 @@
-﻿
-using GameGuessTheWord.Entities;
-using System.Data;
+﻿using System.Text;
 
 namespace GameGuessTheWord.services;
 
@@ -69,53 +67,93 @@ internal class GameService
         try
         {
             var randomWord = GetRandomWord();
-            var asteriskedWord = ShowWordPartilly(randomWord);
+            var guessedLetters = new StringBuilder(new string('*', randomWord.Length));
+            var wrongGuesses = new List<char>();
             Console.Clear();
 
-            int tries = 0;
             bool isWinner = false;
+            int attempts = 6;
+            int tries = 0;
 
-            for (int attempts = 6; attempts > 0; attempts--)
+            while (attempts > 0 && !isWinner)
             {
-                Console.WriteLine($"You have {attempts} attempts left. Enter the letter: ");
-                var raw = Console.ReadLine().ToLower() ?? string.Empty;
-                int rowLength = raw.Length;
-
+                Console.WriteLine($"The word is a name of fruit: {guessedLetters}\n");
+                Console.WriteLine($"Wrong guesses: {string.Join(", ", wrongGuesses)}\n");
+                Console.WriteLine($"You have {attempts} attempts left. Enter a letter or the full word: \n");
+                var input = Console.ReadLine()?.ToLower();
+                attempts--;
                 tries++;
-                if (string.IsNullOrWhiteSpace(raw))
+                Console.Clear();
+
+                if (string.IsNullOrEmpty(input))
                 {
-                    Console.WriteLine("Please enter a letter(s).");
+                    Console.WriteLine("Please enter a letter or the full word.");
                     continue;
                 }
-                for (int i = 0; i < randomWord.Length; i++)
+                
+                if (input.Length > 1)
                 {
-                    if (asteriskedWord[i] != '*')
+                    if (input.Equals(randomWord, StringComparison.OrdinalIgnoreCase))
                     {
-                        continue;
-                    }
-                    if (randomWord.Contains(raw))
-                    {
-                        asteriskedWord = asteriskedWord.Remove(i, rowLength).Insert(i, raw);
-                        Console.WriteLine($"Congratulations! You've guessed the letter, the letter is in the {randomWord[i + 1]} place in the word");
-                    }
-                    if (asteriskedWord.Equals(randomWord, StringComparison.OrdinalIgnoreCase))
-                    {
-                        Console.WriteLine($"Congratulations! You've guessed the word: {randomWord}");
                         isWinner = true;
-                        break;
                     }
                     else
                     {
-                        Console.WriteLine("wrong letter, try again!");
-                        break;
+                        Console.WriteLine("That's not the correct word. Try again!");
                     }
                 }
-            }
-            Console.WriteLine(asteriskedWord);
+                else
+                {
+                    char guessedChar = input[0];
+                    if (!char.IsLetter(guessedChar))
+                    {
+                        Console.WriteLine("Please enter a valid letter.");
+                        continue;
+                    }
 
-            if (!isWinner)
+                    bool alreadyGuessed = guessedLetters.ToString().Contains(guessedChar) || wrongGuesses.Contains(guessedChar);
+
+                    if (alreadyGuessed)
+                    {
+                        Console.WriteLine("You have already guessed that letter. Try another one.");
+                        continue;
+                    }
+
+                    bool found = false;
+                    for (int i = 0; i < randomWord.Length; i++)
+                    {
+                        if (randomWord[i] == guessedChar)
+                        {
+                            guessedLetters[i] = guessedChar;
+                            found = true;
+                        }
+                    }
+
+                    if (found)
+                    {
+                        Console.WriteLine("Good guess!");
+                        if (guessedLetters.ToString().Equals(randomWord, StringComparison.OrdinalIgnoreCase))
+                        {
+                            isWinner = true;
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Wrong letter, try again!");
+                        wrongGuesses.Add(guessedChar);
+                    }
+                }
+                Console.WriteLine();
+            }
+
+            Console.Clear();
+            if (isWinner)
             {
-                Console.WriteLine($"Sorry, you've run out of attempts! The number was {randomWord}.");
+                Console.WriteLine($"Congratulations! You've guessed the word: {randomWord} in {tries} attempts");
+            }
+            else
+            {
+                Console.WriteLine($"Sorry, you've run out of attempts! The word was: {randomWord}.");
             }
 
             return tries;
@@ -126,13 +164,6 @@ internal class GameService
             return -1;
         }
     }
-
-    private string ShowWordPartilly(string wordToGuess)
-    {
-        string asteriskedWord = new string('*', wordToGuess.Length);
-        return asteriskedWord;
-    }
-
 
     private string GetRandomWord()
     {

@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Users>
+  <user name="mgg">
+    <userName>mgg</userName>
+    <password>mgg</password>
+    <higestScore>0</higestScore>
+  </user>
+  <user name="diana">
+    <userName>diana</userName>
+    <password>dnn</password>
+    <higestScore>7</higestScore>
+  </user>
+  <user name="magda">
+    <userName>magda</userName>
+    <password>mgg</password>
+    <higestScore>0</higestScore>
+  </user>
+  <user name="mari">
+    <userName>mari</userName>
+    <password>mar</password>
+    <higestScore>5</higestScore>
+  </user>
+  <user name="mari">
+    <userName>mar</userName>
+    <password>mar</password>
+    <higestScore>6</higestScore>
+  </user>
+  <user name="nana">
+    <userName>nana</userName>
+    <password>nn</password>
+    <higestScore>4</higestScore>
+  </user>
+  <user name="nata">
+    <userName>nata</userName>
+    <password>nt</password>
+    <higestScore>
+    </higestScore>
+  </user>
+</Users>
