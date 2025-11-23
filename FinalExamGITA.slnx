@@ -1,4 +1,5 @@
 <Solution>
   <Project Path="ConsoleCalculator/ConsoleCalculator.csproj" Id="ddb666bf-ec2c-414a-98d4-f7aae8fa49a9" />
   <Project Path="GameGuessTheNumber/GameGuessTheNumber.csproj" Id="b414a3c1-8b51-4312-9ee0-4ee761e8aada" />
+  <Project Path="GameGuessTheWord/GameGuessTheWord.csproj" Id="9b72b58f-62ec-4dc3-a072-09edd2ad337b" />
 </Solution>
