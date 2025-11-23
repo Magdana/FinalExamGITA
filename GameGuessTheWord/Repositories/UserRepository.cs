@@ -18,71 +18,104 @@ internal class UserRepository
 
     private List<User> LoadUsers()
     {
-        if (!File.Exists(_filePath))
+        try
         {
+            if (!File.Exists(_filePath))
+            {
+                return new List<User>();
+            }
+
+            var users = new List<User>();
+            var doc = new XmlDocument();
+            doc.Load(_filePath);
+
+            var userNodes = doc.SelectNodes("//Users/user");
+            if (userNodes != null)
+            {
+                foreach (XmlNode userNode in userNodes)
+                {
+                    var user = new User
+                    {
+                        Name = userNode.Attributes?["name"]?.Value ?? string.Empty,
+                        UserName = userNode.SelectSingleNode("userName")?.InnerText ?? string.Empty,
+                        Password = userNode.SelectSingleNode("password")?.InnerText ?? string.Empty,
+                    };
+
+                    if (int.TryParse(userNode.SelectSingleNode("higestScore")?.InnerText, out int score))
+                    {
+                        user.HigestScore = score;
+                    }
+                    else
+                    {
+                        user.HigestScore = null;
+                    }
+                    users.Add(user);
+                }
+            }
+            return users;
+        }
+        catch (XmlException ex)
+        {
+            Console.WriteLine($"Error loading users from XML: {ex.Message}");
             return new List<User>();
         }
-
-        var users = new List<User>();
-        var doc = new XmlDocument();
-        doc.Load(_filePath);
-
-        var userNodes = doc.SelectNodes("//Users/user");
-        if (userNodes != null)
+        catch (IOException ex)
         {
-            foreach (XmlNode userNode in userNodes)
-            {
-                var user = new User
-                {
-                    Name = userNode.Attributes?["name"]?.Value ?? string.Empty,
-                    UserName = userNode.SelectSingleNode("userName")?.InnerText ?? string.Empty,
-                    Password = userNode.SelectSingleNode("password")?.InnerText ?? string.Empty,
-                };
-
-                if (int.TryParse(userNode.SelectSingleNode("higestScore")?.InnerText, out int score))
-                {
-                    user.HigestScore = score;
-                }
-                else
-                {
-                    user.HigestScore = null;
-                }
-                users.Add(user);
-            }
+            Console.WriteLine($"File error while loading users: {ex.Message}");
+            return new List<User>();
         }
-        return users;
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An unexpected error occurred while loading users: {ex.Message}");
+            return new List<User>();
+        }
     }
 
     private void SaveUsers()
     {
-        var doc = new XmlDocument();
-        XmlDeclaration xmlDeclaration = doc.CreateXmlDeclaration("1.0", "UTF-8", string.Empty);
-        doc.AppendChild(xmlDeclaration);
-        XmlElement root = doc.CreateElement("Users");
-        doc.AppendChild(root);
-
-        foreach (var user in _users)
+        try
         {
-            XmlElement userEl = doc.CreateElement("user");
-            root.AppendChild(userEl);
+            var doc = new XmlDocument();
+            XmlDeclaration xmlDeclaration = doc.CreateXmlDeclaration("1.0", "UTF-8", string.Empty);
+            doc.AppendChild(xmlDeclaration);
+            XmlElement root = doc.CreateElement("Users");
+            doc.AppendChild(root);
 
-            XmlAttribute nameAttr = doc.CreateAttribute("name");
-            nameAttr.Value = user.Name;
-            userEl.Attributes.Append(nameAttr);
+            foreach (var user in _users)
+            {
+                XmlElement userEl = doc.CreateElement("user");
+                root.AppendChild(userEl);
 
-            XmlElement userNameEl = doc.CreateElement("userName");
-            userNameEl.InnerText = user.UserName;
-            userEl.AppendChild(userNameEl);
+                XmlAttribute nameAttr = doc.CreateAttribute("name");
+                nameAttr.Value = user.Name;
+                userEl.Attributes.Append(nameAttr);
 
-            XmlElement passwordEl = doc.CreateElement("password");
-            passwordEl.InnerText = user.Password;
-            userEl.AppendChild(passwordEl);
+                XmlElement userNameEl = doc.CreateElement("userName");
+                userNameEl.InnerText = user.UserName;
+                userEl.AppendChild(userNameEl);
 
-            XmlElement scoreEl = doc.CreateElement("higestScore");
-            scoreEl.InnerText = user.HigestScore.HasValue ? user.HigestScore.Value.ToString() : string.Empty;
-            userEl.AppendChild(scoreEl);
+                XmlElement passwordEl = doc.CreateElement("password");
+                passwordEl.InnerText = user.Password;
+                userEl.AppendChild(passwordEl);
+
+                XmlElement scoreEl = doc.CreateElement("higestScore");
+                scoreEl.InnerText = user.HigestScore.HasValue ? user.HigestScore.Value.ToString() : string.Empty;
+                userEl.AppendChild(scoreEl);
+            }
+            doc.Save(_filePath);
         }
-        doc.Save(_filePath);
+        catch (XmlException ex)
+        {
+            Console.WriteLine($"Error saving users to XML: {ex.Message}");
+        }
+        catch (IOException ex)
+        {
+            Console.WriteLine($"File error while saving users: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An unexpected error occurred while saving users: {ex.Message}");
+        }
     }
 
     public User? GetUserByUsername(string username)
@@ -97,19 +130,27 @@ internal class UserRepository
 
     public User AddUser(User user)
     {
-        if (GetUserByUsername(user.UserName) != null)
+        try
         {
-            throw new Exception("User with the same username already exists.");
+            if (GetUserByUsername(user.UserName) != null)
+            {
+                throw new Exception("User with the same username already exists.");
+            }
+            if (string.IsNullOrWhiteSpace(user.Name) ||
+                string.IsNullOrWhiteSpace(user.UserName) ||
+                string.IsNullOrWhiteSpace(user.Password))
+            {
+                throw new Exception("User properties cannot be null or empty.");
+            }
+            _users.Add(user);
+            SaveUsers();
+            return user;
         }
-        if (string.IsNullOrWhiteSpace(user.Name) ||
-            string.IsNullOrWhiteSpace(user.UserName) ||
-            string.IsNullOrWhiteSpace(user.Password))
+        catch (Exception ex)
         {
-            throw new Exception("User properties cannot be null or empty.");
+            Console.WriteLine($"Error adding user: {ex.Message}");
+            throw;
         }
-        _users.Add(user);
-        SaveUsers();
-        return user;
     }
 
     public void UpdateUserScore(User user, int newScore)

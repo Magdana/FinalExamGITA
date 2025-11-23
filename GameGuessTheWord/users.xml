@@ -36,4 +36,9 @@
     <higestScore>
     </higestScore>
   </user>
+  <user name="beka">
+    <userName>beka</userName>
+    <password>beka</password>
+    <higestScore>3</higestScore>
+  </user>
 </Users>

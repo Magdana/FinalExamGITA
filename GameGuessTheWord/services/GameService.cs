@@ -11,55 +11,63 @@ internal class GameService
     }
     public void StartGame()
     {
-        while (true)
+        try
         {
-            Console.Clear();
-            Console.WriteLine("===== GUESS THE NUMBER =====");
-            Console.WriteLine("1. Register");
-            Console.WriteLine("2. Login");
-            Console.WriteLine("3. Leaderboard");
-            Console.WriteLine("4. Exit");
-            Console.Write("Choose: ");
-
-            string? choice = Console.ReadLine();
-
-            switch (choice)
+            while (true)
             {
-                case "1":
-                    _userService.Register();
-                    break;
-                case "2":
-                    var user = _userService.Login();
-                    if (user != null)
-                    {
-                        Console.Clear();
-                        Console.WriteLine($"Welcome, {user.UserName}!");
+                Console.Clear();
+                Console.WriteLine("===== GUESS THE WORD =====");
+                Console.WriteLine("1. Register");
+                Console.WriteLine("2. Login");
+                Console.WriteLine("3. Leaderboard");
+                Console.WriteLine("4. Exit");
+                Console.Write("Choose: ");
 
-                        Console.WriteLine("\nPress ENTER to start the game...");
-                        Console.ReadLine();
+                string? choice = Console.ReadLine();
 
-                        int attempts = Play();
-
-                        if (attempts >= 0)
+                switch (choice)
+                {
+                    case "1":
+                        _userService.Register();
+                        break;
+                    case "2":
+                        var user = _userService.Login();
+                        if (user != null)
                         {
-                            _userService.UpdateUserScore(user, attempts);
+                            Console.Clear();
+                            Console.WriteLine($"Welcome, {user.UserName}!");
+
+                            Console.WriteLine("\nPress ENTER to start the game...");
+                            Console.ReadLine();
+
+                            int attempts = Play();
+
+                            if (attempts >= 0)
+                            {
+                                _userService.UpdateUserScore(user, attempts);
+                            }
                         }
-                    }
-                    break;
-                case "3":
-                    _userService.ShowLeaderboard();
-                    break;
-                case "4":
-                    return;
-                default:
-                    Console.WriteLine("Invalid choice.");
-                    break;
+                        break;
+                    case "3":
+                        _userService.ShowLeaderboard();
+                        break;
+                    case "4":
+                        return;
+                    default:
+                        Console.WriteLine("Invalid choice.");
+                        break;
+                }
+
+                Console.WriteLine("\nPress ENTER to continue...");
+                Console.ReadLine();
             }
-
-            Console.WriteLine("\nPress ENTER to continue...");
-            Console.ReadLine();
         }
-
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An unexpected error occurred in the game loop: {ex.Message}");
+            Console.WriteLine("Press any key to continue...");
+            Console.ReadKey();
+        }
     }
 
     private int Play()
