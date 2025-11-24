@@ -62,5 +62,13 @@
     "PersonalNumber": "77788899910",
     "Password": "9792",
     "Balance": 0
+  },
+  {
+    "Id": "00000000-0000-0000-0000-000000000000",
+    "Name": "mss",
+    "LastName": "ss",
+    "PersonalNumber": "45678912320",
+    "Password": "9451",
+    "Balance": 99999304
   }
 ]

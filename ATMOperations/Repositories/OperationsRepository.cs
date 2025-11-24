@@ -14,14 +14,21 @@ internal class OperationsRepository
 
     public void LogOperation(OperationType operationType, decimal amount, string personalNumber)
     {
-        var logEntry = new Operation
+        try
         {
-            OperationType = operationType,
-            Amount = amount,
-            PersonalNumber = personalNumber
-        };
+            var logEntry = new Operation
+            {
+                OperationType = operationType,
+                Amount = amount,
+                PersonalNumber = personalNumber
+            };
         string jsonLog = JsonSerializer.Serialize(logEntry);
-        LogToJson(jsonLog);
+            LogToJson(jsonLog);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to log operation: {ex.Message}");
+        }
     }
 
     private void LogToJson(string log)
@@ -74,8 +81,9 @@ internal class OperationsRepository
                         operations.Add(operation);
                     }
                 }
-                catch (JsonException)
+                catch (JsonException ex)
                 {
+                    Console.WriteLine($"Warning: Failed to parse operation line: {ex.Message}");
                     continue;
                 }
             }

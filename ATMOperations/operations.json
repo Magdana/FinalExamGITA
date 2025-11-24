@@ -10,3 +10,7 @@
 {"Timestamp":"2025-11-24T19:10:33.6100324+04:00","OperationType":1,"Amount":1500,"PersonalNumber":"11111111111"}
 {"Timestamp":"2025-11-24T19:10:42.1947601+04:00","OperationType":0,"Amount":0,"PersonalNumber":"11111111111"}
 {"Timestamp":"2025-11-24T19:10:52.1656796+04:00","OperationType":2,"Amount":100,"PersonalNumber":"11111111111"}
+{"Timestamp":"2025-11-24T19:33:38.8870518+04:00","OperationType":0,"Amount":0,"PersonalNumber":"45678912320"}
+{"Timestamp":"2025-11-24T19:33:48.998355+04:00","OperationType":1,"Amount":100000000,"PersonalNumber":"45678912320"}
+{"Timestamp":"2025-11-24T19:34:06.4937698+04:00","OperationType":2,"Amount":700,"PersonalNumber":"45678912320"}
+{"Timestamp":"2025-11-24T19:34:23.1622862+04:00","OperationType":1,"Amount":4,"PersonalNumber":"45678912320"}

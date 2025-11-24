@@ -43,14 +43,14 @@ internal class UserService
             {
                 Console.Write("Enter your personal number (11 digits): ");
                 personalid = Console.ReadLine() ?? string.Empty;
-
+                
                 if (personalid.Length == 11 && personalid.All(char.IsDigit))
                 {
                     break;
                 }
                 Console.WriteLine("Invalid format. Personal number must be exactly 11 digits.");
             }
-            
+
             if (_userRepository.GetUserByPersonalNumber(personalid) != null)
             {
                 Console.WriteLine("Username already exists!");
@@ -65,13 +65,12 @@ internal class UserService
 
             _userRepository.AddUser(user);
 
-
             Console.WriteLine($"Registration successful! Your password is {user.Password}");
             Console.ReadLine();
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error: {ex.Message}");
+            Console.WriteLine($"Error during registration: {ex.Message}");
         }
     }
 
@@ -83,6 +82,12 @@ internal class UserService
             Console.Clear();
             Console.Write("personal ID: ");
             string personal = Console.ReadLine() ?? string.Empty;
+
+            if (string.IsNullOrWhiteSpace(personal))
+            {
+                Console.WriteLine("Personal ID cannot be empty.");
+                return null;
+            }
 
             var user = _userRepository.GetUserByPersonalNumber(personal);
 
@@ -112,19 +117,51 @@ internal class UserService
 
     public double BalanceCheck(User user)
     {
-        return _userRepository.BalanceCheck(user);
-
+        try
+        {
+            return _userRepository.BalanceCheck(user);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error checking balance: {ex.Message}");
+            throw;
+        }
     }
     public void Deposit(User user, double amount)
     {
-        _userRepository.Deposit(user, amount);
+        try
+        {
+            _userRepository.Deposit(user, amount);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error during deposit: {ex.Message}");
+            throw;
+        }
     }
     public void Withdraw(User user, double amount)
     {
-        _userRepository.Withdraw(user, amount);
+        try
+        {
+            _userRepository.Withdraw(user, amount);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error during withdrawal: {ex.Message}");
+            throw;
+        }
     }
     public string ViewHistoryOfOperations(string personalid)
     {
-        return _userRepository.ViewHistoryOfOperations(personalid);
+        try
+        {
+            return _userRepository.ViewHistoryOfOperations(personalid);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error retrieving operation history: {ex.Message}");
+            throw;
+        }
     }
 }
+
