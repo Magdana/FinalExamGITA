@@ -1,74 +1,18 @@
 [
   {
-    "Id": "00000000-0000-0000-0000-000000000000",
+    "Id": "295f6ee7-1a25-4a3c-b57d-2421f670f9af",
     "Name": "magda",
-    "LastName": "gvirjishvili",
+    "LastName": "magda",
     "PersonalNumber": "11111111111",
-    "Password": "1475",
-    "Balance": 1405
+    "Password": "6031",
+    "Balance": 95
   },
   {
-    "Id": "00000000-0000-0000-0000-000000000000",
-    "Name": "diana",
-    "LastName": "gvirjishvili",
-    "PersonalNumber": "222222222",
-    "Password": "4574",
-    "Balance": 0
-  },
-  {
-    "Id": "00000000-0000-0000-0000-000000000000",
-    "Name": "ll",
-    "LastName": "ll",
-    "PersonalNumber": "33333333333",
-    "Password": "5833",
-    "Balance": 0
-  },
-  {
-    "Id": "00000000-0000-0000-0000-000000000000",
-    "Name": "ggg",
-    "LastName": "gdg",
-    "PersonalNumber": "77777777777",
-    "Password": "4943",
-    "Balance": 0
-  },
-  {
-    "Id": "00000000-0000-0000-0000-000000000000",
-    "Name": "add",
-    "LastName": "ggg",
-    "PersonalNumber": "55555555555",
-    "Password": "8672",
-    "Balance": 0
-  },
-  {
-    "Id": "00000000-0000-0000-0000-000000000000",
-    "Name": "yy",
-    "LastName": "yy",
+    "Id": "925225d3-c661-4c56-9df4-cb730cb5fa88",
+    "Name": "cc",
+    "LastName": "cc",
     "PersonalNumber": "12345678910",
-    "Password": "6162",
+    "Password": "8012",
     "Balance": 0
-  },
-  {
-    "Id": "00000000-0000-0000-0000-000000000000",
-    "Name": "mana",
-    "LastName": "ssS",
-    "PersonalNumber": "22233344456",
-    "Password": "5103",
-    "Balance": 0
-  },
-  {
-    "Id": "00000000-0000-0000-0000-000000000000",
-    "Name": "GGG",
-    "LastName": "GGGG",
-    "PersonalNumber": "77788899910",
-    "Password": "9792",
-    "Balance": 0
-  },
-  {
-    "Id": "00000000-0000-0000-0000-000000000000",
-    "Name": "mss",
-    "LastName": "ss",
-    "PersonalNumber": "45678912320",
-    "Password": "9451",
-    "Balance": 99999304
   }
 ]

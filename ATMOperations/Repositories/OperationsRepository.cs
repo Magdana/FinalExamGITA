@@ -6,11 +6,71 @@ namespace ATMOperations.Repositories;
 internal class OperationsRepository
 {
     private readonly string _filePath;
+    private List<Operation> _operations;
+
     public OperationsRepository(string filePath)
     {
         _filePath = filePath;
+        _operations = LoadOperations();
     }
 
+    private List<Operation> LoadOperations()
+    {
+        try
+        {
+            if (!File.Exists(_filePath))
+            {
+                return new List<Operation>();
+            }
+
+            string jsonString = File.ReadAllText(_filePath);
+            if (string.IsNullOrWhiteSpace(jsonString))
+            {
+                return new List<Operation>();
+            }
+
+            var operations = JsonSerializer.Deserialize<List<Operation>>(jsonString);
+            return operations ?? new List<Operation>();
+        }
+        catch (JsonException ex)
+        {
+            Console.WriteLine($"JSON error while loading operations: {ex.Message}");
+            return new List<Operation>();
+        }
+        catch (IOException ex)
+        {
+            Console.WriteLine($"File error while loading operations: {ex.Message}");
+            return new List<Operation>();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An unexpected error occurred while loading operations: {ex.Message}");
+            return new List<Operation>();
+        }
+    }
+
+    private void SaveOperations()
+    {
+        try
+        {
+            string? directory = Path.GetDirectoryName(_filePath);
+            if (!string.IsNullOrEmpty(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            string jsonString = JsonSerializer.Serialize(_operations, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(_filePath, jsonString);
+        }
+        catch (IOException ex)
+        {
+            Console.WriteLine($"File error while saving operations: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An unexpected error occurred while saving operations: {ex.Message}");
+        }
+    }
 
     public void LogOperation(OperationType operationType, decimal amount, string personalNumber)
     {
@@ -22,8 +82,9 @@ internal class OperationsRepository
                 Amount = amount,
                 PersonalNumber = personalNumber
             };
-        string jsonLog = JsonSerializer.Serialize(logEntry);
-            LogToJson(jsonLog);
+            
+            _operations.Add(logEntry);
+            SaveOperations();
         }
         catch (Exception ex)
         {
@@ -31,72 +92,18 @@ internal class OperationsRepository
         }
     }
 
-    private void LogToJson(string log)
-    {
-        try
-        {
-            string? directory = Path.GetDirectoryName(_filePath);
-            if (!string.IsNullOrEmpty(directory))
-            {
-                Directory.CreateDirectory(directory);
-            }
-            using (StreamWriter sw = new StreamWriter(_filePath, append: true))
-            {
-                sw.WriteLine(log);
-            }
-        }
-        catch (IOException ex)
-        {
-            Console.WriteLine($"File error while logging operation: {ex.Message}");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"An unexpected error occurred while logging operation: {ex.Message}");
-        }
-    }
-
     public List<Operation> GetOperationsByPersonalNumber(string personalNumber)
     {
-        var operations = new List<Operation>();
-        
         try
         {
-            if (!File.Exists(_filePath))
-            {
-                return operations;
-            }
-
-            var lines = File.ReadAllLines(_filePath);
-            
-            foreach (var line in lines)
-            {
-                if (string.IsNullOrWhiteSpace(line))
-                    continue;
-
-                try
-                {
-                    var operation = JsonSerializer.Deserialize<Operation>(line);
-                    if (operation != null && operation.PersonalNumber.Equals(personalNumber, StringComparison.OrdinalIgnoreCase))
-                    {
-                        operations.Add(operation);
-                    }
-                }
-                catch (JsonException ex)
-                {
-                    Console.WriteLine($"Warning: Failed to parse operation line: {ex.Message}");
-                    continue;
-                }
-            }
-        }
-        catch (IOException ex)
-        {
-            Console.WriteLine($"File error while reading operations: {ex.Message}");
+            return _operations
+                .Where(op => op.PersonalNumber.Equals(personalNumber, StringComparison.OrdinalIgnoreCase))
+                .ToList();
         }
         catch (Exception ex)
         {
             Console.WriteLine($"An unexpected error occurred while reading operations: {ex.Message}");
+            return new List<Operation>();
         }
-
-        return operations;
     }
 }
