@@ -58,10 +58,11 @@ internal class UserService
             }
             User user = new User
             {
+                Id = Guid.NewGuid(),
                 Name = name,
                 LastName = lastname,
                 PersonalNumber = personalid
-            };
+            }; 
 
             _userRepository.AddUser(user);
 

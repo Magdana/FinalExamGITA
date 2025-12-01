@@ -4,7 +4,7 @@ namespace ATMOperations.Entities;
 
 internal class User
 {
-    public Guid Id { get; set; } = new Guid();
+    public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
     public string PersonalNumber { get; set; } = string.Empty;

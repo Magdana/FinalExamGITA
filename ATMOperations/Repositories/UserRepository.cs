@@ -187,9 +187,8 @@ internal class UserRepository
             SaveUsers();
             _operationsRepository.LogOperation(OperationType.Withdraw, (decimal)amount, user.PersonalNumber);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Console.WriteLine($"Error during withdrawal: {ex.Message}");
             throw;
         }
     }
