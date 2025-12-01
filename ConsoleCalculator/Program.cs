@@ -6,29 +6,56 @@ namespace ConsoleCalculator
     {
         static void Main(string[] args)
         {
-            while (true)
+            try
             {
-                double num1 = GetFirstNumber();
-                double num2 = GetSecondNumber();
-                string? operation = GetOperator();
-                try
+                while (true)
                 {
-                    CalculationOperation(num1, num2, operation);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"An unexpected error occurred: {ex.Message}");
-                }
+                    try
+                    {
+                        double num1 = GetFirstNumber();
+                        double num2 = GetSecondNumber();
+                        string? operation = GetOperator();
+                        
+                        CalculationOperation(num1, num2, operation);
+                    }
+                    catch (DivideByZeroException ex)
+                    {
+                        Console.WriteLine($"\n✗ Division Error: {ex.Message}");
+                    }
+                    catch (OverflowException ex)
+                    {
+                        Console.WriteLine($"\n✗ Calculation Overflow: {ex.Message}");
+                    }
+                    catch (ArgumentNullException ex)
+                    {
+                        Console.WriteLine($"\n✗ Invalid Input: {ex.Message}");
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        Console.WriteLine($"\n✗ Operation Error: {ex.Message}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"\n✗ An unexpected error occurred: {ex.Message}");
+                    }
 
-                Console.WriteLine();
-                Console.Write("Press Enter to perform another calculation or type 'exit' to quit: ");
-                string? prompt = Console.ReadLine();
-                if (!string.IsNullOrWhiteSpace(prompt) && prompt.Trim().Equals("exit", StringComparison.OrdinalIgnoreCase))
-                {
-                    break;
-                }
+                    Console.WriteLine();
+                    Console.Write("Press Enter to perform another calculation or type 'exit' to quit: ");
+                    string? prompt = Console.ReadLine();
+                    if (!string.IsNullOrWhiteSpace(prompt) && prompt.Trim().Equals("exit", StringComparison.OrdinalIgnoreCase))
+                    {
+                        Console.WriteLine("\nThank you for using the calculator. Goodbye!");
+                        break;
+                    }
 
-                Console.Clear();
+                    Console.Clear();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"\n✗ Fatal error in calculator application: {ex.Message}");
+                Console.WriteLine("Press any key to exit...");
+                Console.ReadKey();
             }
         }
 
@@ -39,55 +66,97 @@ namespace ConsoleCalculator
 
         private static string? ReadOperator(string prompt)
         {
+            if (string.IsNullOrWhiteSpace(prompt))
+            {
+                throw new ArgumentNullException(nameof(prompt), "Prompt cannot be null or empty.");
+            }
+
             while (true)
             {
-                Console.Write(prompt);
-                string? input = Console.ReadLine();
-
-                if (string.IsNullOrWhiteSpace(input))
+                try
                 {
-                    Console.WriteLine("Input required. Please enter a right operator.");
-                    continue;
-                }
+                    Console.Write(prompt);
+                    string? input = Console.ReadLine();
 
-                if (input == "+" || input == "-" || input == "*" || input == "/")
+                    if (string.IsNullOrWhiteSpace(input))
+                    {
+                        Console.WriteLine("Input required. Please enter a valid operator.");
+                        continue;
+                    }
+
+                    if (input == "+" || input == "-" || input == "*" || input == "/")
+                    {
+                        return input;
+                    }
+
+                    Console.WriteLine("Invalid operator. Please enter one of: +, -, *, /");
+                }
+                catch (OutOfMemoryException)
                 {
-                    return input;
+                    throw new InvalidOperationException("System is out of memory. Please restart the application.");
                 }
-
-                Console.WriteLine("Invalid operator format. Please try again.");
+                catch (IOException ex)
+                {
+                    throw new InvalidOperationException($"Input/Output error: {ex.Message}");
+                }
             }
         }
 
         private static double GetSecondNumber()
         {
-            return ReadDouble("Enter second number: ");
+            return GetNumberFromPrompt("Enter second number: ");
         }
 
         private static double GetFirstNumber()
         {
-            return ReadDouble("Enter first number: ");
+            return GetNumberFromPrompt("Enter first number: ");
         }
 
-        private static double ReadDouble(string prompt)
+        private static double GetNumberFromPrompt(string prompt)
         {
+            if (string.IsNullOrWhiteSpace(prompt))
+            {
+                throw new ArgumentNullException(nameof(prompt), "Prompt cannot be null or empty.");
+            }
+
             while (true)
             {
-                Console.Write(prompt);
-                string? input = Console.ReadLine();
-
-                if (string.IsNullOrWhiteSpace(input))
+                try
                 {
-                    Console.WriteLine("Input required. Please enter a number.");
-                    continue;
-                }
+                    Console.Write(prompt);
+                    string? input = Console.ReadLine();
 
-                if (double.TryParse(input, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.CurrentCulture, out double value))
+                    if (string.IsNullOrWhiteSpace(input))
+                    {
+                        Console.WriteLine("Input required. Please enter a number.");
+                        continue;
+                    }
+
+                    if (double.TryParse(input, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.CurrentCulture, out double value))
+                    {
+                        if (double.IsInfinity(value))
+                        {
+                            throw new OverflowException("The number is too large or too small.");
+                        }
+
+                        if (double.IsNaN(value))
+                        {
+                            throw new InvalidOperationException("The input resulted in an invalid number.");
+                        }
+
+                        return value;
+                    }
+
+                    Console.WriteLine("Invalid number format. Please try again.");
+                }
+                catch (OutOfMemoryException)
                 {
-                    return value;
+                    throw new InvalidOperationException("System is out of memory. Please restart the application.");
                 }
-
-                Console.WriteLine("Invalid number format. Please try again.");
+                catch (IOException ex)
+                {
+                    throw new InvalidOperationException($"Input/Output error: {ex.Message}");
+                }
             }
         }
 
@@ -95,34 +164,69 @@ namespace ConsoleCalculator
         {
             if (string.IsNullOrEmpty(operation))
             {
-                Console.WriteLine("No operation provided.");
-                return;
+                throw new ArgumentNullException(nameof(operation), "No operation provided.");
             }
 
-            switch (operation)
+            try
             {
-                case "+":
-                    Console.WriteLine($"Result: {num1 + num2}");
-                    break;
-                case "-":
-                    Console.WriteLine($"Result: {num1 - num2}");
-                    break;
-                case "*":
-                    Console.WriteLine($"Result: {num1 * num2}");
-                    break;
-                case "/":
-                    if (num2 == 0)
-                    {
-                        Console.WriteLine("Cannot divide by zero.");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Result: {num1 / num2}");
-                    }
-                    break;
-                default:
-                    Console.WriteLine("Invalid operation.");
-                    break;
+                switch (operation)
+                {
+                    case "+":
+                        double addResult = num1 + num2;
+                        if (double.IsInfinity(addResult))
+                        {
+                            throw new OverflowException("The result of addition is too large.");
+                        }
+                        Console.WriteLine($"\nResult: {num1} + {num2} = {addResult}");
+                        break;
+
+                    case "-":
+                        double subtractResult = num1 - num2;
+                        if (double.IsInfinity(subtractResult))
+                        {
+                            throw new OverflowException("The result of subtraction is too large.");
+                        }
+                        Console.WriteLine($"\nResult: {num1} - {num2} = {subtractResult}");
+                        break;
+
+                    case "*":
+                        double multiplyResult = num1 * num2;
+                        if (double.IsInfinity(multiplyResult))
+                        {
+                            throw new OverflowException("The result of multiplication is too large.");
+                        }
+                        Console.WriteLine($"\nResult: {num1} × {num2} = {multiplyResult}");
+                        break;
+
+                    case "/":
+                        if (num2 == 0)
+                        {
+                            throw new DivideByZeroException("Cannot divide by zero. Please enter a non-zero divisor.");
+                        }
+
+                        double divideResult = num1 / num2;
+                        if (double.IsInfinity(divideResult))
+                        {
+                            throw new OverflowException("The result of division is too large.");
+                        }
+                        Console.WriteLine($"\nResult: {num1} ÷ {num2} = {divideResult}");
+                        break;
+
+                    default:
+                        throw new InvalidOperationException($"Invalid operation: '{operation}'. Supported operations are: +, -, *, /");
+                }
+            }
+            catch (OverflowException)
+            {
+                throw;
+            }
+            catch (DivideByZeroException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Calculation error: {ex.Message}", ex);
             }
         }
     }
